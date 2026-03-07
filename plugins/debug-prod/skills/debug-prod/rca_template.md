@@ -1,12 +1,8 @@
-# RCA Report Template
-
-Use this template to produce the final investigation report.
-
----
+> **Note**: This template is only used when the user explicitly asks for a written report.
 
 # RCA: {issue_title}
 
-**Tenant**: {tenant}
+**Filter**: {filter_pattern}
 **Date**: {date}
 **Investigator**: Claude + {engineer}
 **Log Group(s)**: {log_groups}
@@ -30,50 +26,18 @@ Clear statement of what caused the issue. If inconclusive, list top hypotheses r
 
 ## Evidence
 
-### Phase 1 — Reconnaissance
-- Log volume: {summary}
-- Message type distribution: see `{csv_file}`
-- Key observation: {finding}
+For each investigation strategy used, include a subsection:
 
-### Phase 2 — Endpoint Performance
-- Slowest endpoints: {list}
-- Latency percentiles: see `{csv_file}`
-- Key observation: {finding}
-
-### Phase 3 — Error Analysis
-- Error rate: {summary}
-- Error types: {list}
-- Temporal pattern: {description}
-- See `{csv_file}`
-
-### Phase 4 — Deep Trace
-- Request ID: `{request_id}`
-- Total duration: {duration}
-- Bottleneck: {description}
-- See `{csv_file}`
-
-### Phase 5 — Session Timeline
-- User activity pattern: {description}
-- See `{csv_file}`
-
-### Phase 6 — Cross-Service
-- Related services checked: {list}
-- Findings: {description}
-- See `{csv_file}`
+### [Strategy Name]
+- What was found
+- Key data points
+- How it supports or refutes the root cause hypothesis
 
 ## Impact
 
 - **Users affected**: {count or description}
 - **Duration**: {how long the issue lasted}
 - **Severity**: {P1/P2/P3/P4}
-
-## Data Files
-
-All investigation data saved in `investigations/`:
-
-| File | Description |
-|------|-------------|
-| `{filename}` | {description} |
 
 ## Recommendations
 
