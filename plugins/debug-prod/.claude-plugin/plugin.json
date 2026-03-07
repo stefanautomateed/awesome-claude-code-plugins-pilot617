@@ -1,0 +1,5 @@
+{
+  "name": "debug-prod",
+  "description": "CloudWatch Log investigation skill with structured 6-phase RCA methodology",
+  "version": "1.0.0"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "awesome-claude-code-plugins",
+  "owner": {
+    "name": "sampat"
+  },
+  "metadata": {
+    "description": "A curated collection of Claude Code plugins",
+    "version": "1.0.0",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "debug-prod",
+      "source": "./plugins/debug-prod",
+      "description": "CloudWatch Log investigation skill with structured 6-phase RCA methodology",
+      "version": "1.0.0",
+      "keywords": ["debugging", "cloudwatch", "aws", "production", "logs", "rca"],
+      "category": "debugging"
+    }
+  ]
+}
