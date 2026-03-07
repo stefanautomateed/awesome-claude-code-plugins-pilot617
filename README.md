@@ -44,6 +44,27 @@ Adaptive production debugger that investigates issues through CloudWatch Logs In
 
 [Full documentation](./plugins/cw-debug/README.md)
 
+### [web-agent](./plugins/web-agent) — Web Automation Agent
+
+General-purpose web automation agent that navigates websites, interacts with UI elements, fills forms, extracts data, and handles logins — all powered by Playwright.
+
+```
+/web-agent "Go to github.com/anthropics/claude-code and extract the star count"
+/web-agent --headed "Go to my-app.localhost:3000, log in, and check the dashboard"
+```
+
+**What it does:**
+- Navigates to any URL and analyzes the page (interactive elements, text, structure)
+- Clicks buttons, fills forms, selects dropdowns, handles multi-step workflows
+- Detects login pages and asks you for credentials interactively
+- Extracts text, tables, and structured data from pages
+- Takes screenshots at every step for visual verification
+- Runs headless by default, `--headed` flag to watch it work
+
+**Requires:** Python 3.9+, Playwright + Chromium
+
+[Full documentation](./plugins/web-agent/README.md)
+
 ## Philosophy
 
 - **Solve real problems** — every plugin addresses a genuine pain point in the development workflow

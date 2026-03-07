@@ -24,6 +24,14 @@
       "version": "1.0.0",
       "keywords": ["ui", "ux", "frontend", "design", "screenshots", "playwright", "validation", "responsive"],
       "category": "frontend"
+    },
+    {
+      "name": "web-agent",
+      "source": "./plugins/web-agent",
+      "description": "General-purpose web automation agent — navigate websites, interact with UI, fill forms, extract data, handle logins using Playwright",
+      "version": "1.0.0",
+      "keywords": ["web", "automation", "browser", "playwright", "scraping", "navigation", "forms", "login"],
+      "category": "automation"
     }
   ]
 }

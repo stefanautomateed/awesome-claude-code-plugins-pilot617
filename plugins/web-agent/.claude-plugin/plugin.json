@@ -1,0 +1,5 @@
+{
+  "name": "web-agent",
+  "description": "General-purpose web automation agent — navigate websites, interact with UI, fill forms, extract data, handle logins using Playwright",
+  "version": "1.0.0"
+}
