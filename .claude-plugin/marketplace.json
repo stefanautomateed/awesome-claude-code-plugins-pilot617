@@ -10,8 +10,8 @@
   },
   "plugins": [
     {
-      "name": "debug-prod",
-      "source": "./plugins/debug-prod",
+      "name": "cw-debug",
+      "source": "./plugins/cw-debug",
       "description": "Generic CloudWatch log investigation skill with adaptive debugging methodology",
       "version": "1.0.0",
       "keywords": ["debugging", "cloudwatch", "aws", "production", "logs", "investigation"],

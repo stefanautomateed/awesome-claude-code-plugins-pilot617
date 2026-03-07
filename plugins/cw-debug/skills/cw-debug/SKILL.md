@@ -1,11 +1,11 @@
 ---
-name: debug-prod
+name: cw-debug
 disable-model-invocation: true
 argument-hint: <log_group> <filter_pattern> <hours_back> <region> "<issue_description>"
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
-# /debug-prod — CloudWatch Log Investigation Skill
+# /cw-debug — CloudWatch Log Investigation Skill
 
 You are investigating a production issue using CloudWatch Logs Insights. Follow the structured methodology below, adapting queries based on what you discover in each phase.
 
@@ -13,7 +13,7 @@ You are investigating a production issue using CloudWatch Logs Insights. Follow 
 
 The user will invoke this skill as:
 ```
-/debug-prod <log_group> <filter_pattern> <hours_back> <region> "<issue_description>"
+/cw-debug <log_group> <filter_pattern> <hours_back> <region> "<issue_description>"
 ```
 
 - `log_group`: The CloudWatch log group path (e.g., `/aws/ecs/my-service`)
@@ -25,12 +25,12 @@ The user will invoke this skill as:
 ## Setup
 
 - Always use `.venv/bin/python` to run scripts
-- The skill has its own self-contained CloudWatch utility at `${CLAUDE_PLUGIN_ROOT}/skills/debug-prod/scripts/cw.py`
+- The skill has its own self-contained CloudWatch utility at `${CLAUDE_PLUGIN_ROOT}/skills/cw-debug/scripts/cw.py`
 - **Do NOT import from `cloudwatch_utils.py`** — use the skill's own module instead
 - To use in inline scripts, add the scripts dir to `sys.path` then import:
   ```python
   import sys, os
-  sys.path.insert(0, os.path.expanduser("${CLAUDE_PLUGIN_ROOT}/skills/debug-prod/scripts"))
+  sys.path.insert(0, os.path.expanduser("${CLAUDE_PLUGIN_ROOT}/skills/cw-debug/scripts"))
   from cw import CWClient
 
   cw = CWClient(region="{region}")
@@ -39,7 +39,7 @@ The user will invoke this skill as:
   ```
 - Or use the CLI directly:
   ```bash
-  .venv/bin/python ${CLAUDE_PLUGIN_ROOT}/skills/debug-prod/scripts/cw.py \
+  .venv/bin/python ${CLAUDE_PLUGIN_ROOT}/skills/cw-debug/scripts/cw.py \
       --region {region} --log-group "{log_group}" --hours {hours_back} \
       --query "fields @timestamp, @message | limit 25"
   ```
@@ -51,7 +51,7 @@ The user will invoke this skill as:
   - `CWClient.print_table(results)` — ASCII table output
   - `CWClient.print_json(results)` — JSON output
   - `cw.save(results, name)` — save to `investigations/<name>.csv`
-- Refer to `${CLAUDE_PLUGIN_ROOT}/skills/debug-prod/query_library.md` for pre-built query templates
+- Refer to `${CLAUDE_PLUGIN_ROOT}/skills/cw-debug/query_library.md` for pre-built query templates
 
 ## Rules
 
@@ -166,4 +166,4 @@ Print to stdout:
 
 ## Output
 
-Print a concise investigation summary to stdout. If the user asks for a written report, use the RCA template at `${CLAUDE_PLUGIN_ROOT}/skills/debug-prod/rca_template.md`.
+Print a concise investigation summary to stdout. If the user asks for a written report, use the RCA template at `${CLAUDE_PLUGIN_ROOT}/skills/cw-debug/rca_template.md`.
