@@ -1,175 +1,175 @@
 # CloudWatch Insights Query Library
 
-Pre-built query templates for production log investigation. Substitute `{tenant}`, `{request_id}`, `{threshold}`, `{user_id}`, `{endpoint}` as needed.
+> **Adapt all parse patterns based on what Phase 1 Reconnaissance reveals about your log format.**
+
+Pre-built query templates for production log investigation. Substitute `{filter_pattern}` with whatever scoping filter is relevant (e.g., a service name, request path, error keyword). Strategy templates use generic placeholders like `{operation_field}`, `{duration_field}`, `{trace_id}`, `{entity_id}` — replace these with the actual field names discovered during reconnaissance.
 
 ---
 
-## Reconnaissance
+## Phase 1 — Reconnaissance
 
-### Message distribution
-```
-fields @timestamp, @message
-| filter @message like /{tenant}/
-| stats count(*) by msg
-| sort count(*) desc
-| limit 50
-```
-
-### Log volume over time
-```
-filter @message like /{tenant}/
-| stats count(*) as cnt by bin(1h)
-| sort bin asc
-```
+These queries are universal and work with any log format. Run them first to understand the shape of your logs before picking a strategy.
 
 ### Sample raw logs
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/
+| filter @message like /{filter_pattern}/
 | sort @timestamp desc
 | limit 25
 ```
 
-### Unique log fields discovery
+### Log volume over time
 ```
-fields @timestamp, @message
-| filter @message like /{tenant}/
-| parse @message '"msg": "*"' as msg_type
-| stats count(*) by msg_type
-| sort count(*) desc
-```
-
----
-
-## Performance
-
-### Endpoint stats with percentiles
-```
-fields @timestamp, @message
-| filter @message like /{tenant}/
-| parse @message '"endpoint": "*"' as endpoint
-| parse @message '"response_time": *,' as response_time
-| stats count(*) as cnt,
-    avg(response_time) as avg_rt,
-    pct(response_time, 50) as p50,
-    pct(response_time, 90) as p90,
-    pct(response_time, 95) as p95,
-    pct(response_time, 99) as p99,
-    max(response_time) as max_rt
-  by endpoint
-| sort max_rt desc
-```
-
-### Slow requests above threshold
-```
-fields @timestamp, @message
-| filter @message like /{tenant}/
-| parse @message '"endpoint": "*"' as endpoint
-| parse @message '"response_time": *,' as response_time
-| filter response_time > {threshold}
-| sort response_time desc
-| limit 50
-```
-
-### Response time over time (for a specific endpoint)
-```
-fields @timestamp, @message
-| filter @message like /{tenant}/ and @message like /{endpoint}/
-| parse @message '"response_time": *,' as response_time
-| stats avg(response_time) as avg_rt, max(response_time) as max_rt, count(*) as cnt by bin(15m)
+filter @message like /{filter_pattern}/
+| stats count(*) as cnt by bin(1h)
 | sort bin asc
 ```
 
----
-
-## Error Analysis
-
-### Error count by type
+### Field discovery (JSON)
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/ and (@message like /error/i or @message like /exception/i or @message like /traceback/i)
-| parse @message '"msg": "*"' as error_msg
-| stats count(*) as cnt by error_msg
+| filter @message like /{filter_pattern}/
+| parse @message '"*":' as field_name
+| stats count(*) by field_name
+| sort count(*) desc
+```
+
+### Message type distribution
+```
+fields @timestamp, @message
+| filter @message like /{filter_pattern}/
+| stats count(*) by @message
+| sort count(*) desc
+| limit 50
+```
+
+---
+
+## Phase 2 — Strategy Templates
+
+Pick a strategy based on what you learned in Phase 1. Replace `{operation_field}`, `{duration_field}`, and other placeholders with the actual field names found in your logs.
+
+---
+
+### Error Analysis
+
+#### Error count by type
+```
+fields @timestamp, @message
+| filter @message like /{filter_pattern}/ and (@message like /error/i or @message like /exception/i or @message like /traceback/i)
+| stats count(*) as cnt by @message
 | sort cnt desc
 | limit 30
 ```
 
-### Error temporal distribution
+#### Error temporal distribution
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/ and (@message like /error/i or @message like /exception/i)
+| filter @message like /{filter_pattern}/ and (@message like /error/i or @message like /exception/i)
 | stats count(*) as error_count by bin(15m)
 | sort bin asc
 ```
 
-### HTTP status code distribution
+#### Stack traces
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/
-| parse @message '"status_code": *,' as status_code
-| stats count(*) as cnt by status_code
-| sort cnt desc
-```
-
-### Stack traces
-```
-fields @timestamp, @message
-| filter @message like /{tenant}/ and @message like /Traceback/
+| filter @message like /{filter_pattern}/ and (@message like /Traceback/ or @message like /stack/i)
 | sort @timestamp desc
 | limit 20
 ```
 
 ---
 
-## Tracing
+### Performance Analysis
 
-### Full request lifecycle
+> Note: Replace `{operation_field}` and `{duration_field}` with the actual field names discovered in Phase 1 (e.g., `endpoint`, `handler`, `response_time`, `latency`).
+
+#### Operation stats with percentiles
 ```
 fields @timestamp, @message
-| filter @message like /{request_id}/
+| filter @message like /{filter_pattern}/
+| parse @message '"{operation_field}": "*"' as operation
+| parse @message '"{duration_field}": *,' as duration
+| stats count(*) as cnt,
+    avg(duration) as avg_dur,
+    pct(duration, 50) as p50,
+    pct(duration, 90) as p90,
+    pct(duration, 95) as p95,
+    pct(duration, 99) as p99,
+    max(duration) as max_dur
+  by operation
+| sort max_dur desc
+```
+
+#### Slow operations above threshold
+```
+fields @timestamp, @message
+| filter @message like /{filter_pattern}/
+| parse @message '"{operation_field}": "*"' as operation
+| parse @message '"{duration_field}": *,' as duration
+| filter duration > {threshold}
+| sort duration desc
+| limit 50
+```
+
+---
+
+### Deep Trace
+
+> Note: Replace `{trace_id}` with the actual identifier field from your logs (e.g., `request_id`, `correlation_id`, `span_id`).
+
+#### Full event lifecycle by trace ID
+```
+fields @timestamp, @message
+| filter @message like /{trace_id}/
 | sort @timestamp asc
 | limit 200
 ```
 
-### Slow requests with full context
+#### Slow events with context
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/
-| parse @message '"request_id": "*"' as request_id
-| parse @message '"response_time": *,' as response_time
-| filter response_time > {threshold}
-| display @timestamp, request_id, response_time
-| sort response_time desc
+| filter @message like /{filter_pattern}/
+| parse @message '"{trace_id}": "*"' as trace_id
+| parse @message '"{duration_field}": *,' as duration
+| filter duration > {threshold}
+| display @timestamp, trace_id, duration
+| sort duration desc
 | limit 20
 ```
 
-### User/session timeline
+---
+
+### Entity Tracking
+
+> Note: Replace `{entity_id}` with the actual identifier for the entity you are investigating (e.g., a user ID, order ID, device ID).
+
+#### All activity for an entity over time
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/ and @message like /{user_id}/
+| filter @message like /{filter_pattern}/ and @message like /{entity_id}/
 | sort @timestamp asc
 | limit 500
 ```
 
 ---
 
-## Cross-Service
+### Cross-Service
 
-### Worker task duration
+> Note: Use the `query_multi` method to run the same query across multiple log groups simultaneously.
+
+#### Cross-service event search
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/ and @message like /task/
-| parse @message '"task_name": "*"' as task_name
-| parse @message '"duration": *,' as duration
-| stats count(*) as cnt, avg(duration) as avg_dur, max(duration) as max_dur by task_name
-| sort max_dur desc
+| filter @message like /{filter_pattern}/
+| sort @timestamp desc
+| limit 100
 ```
 
-### Queue backlog indicator
+#### Cross-service error correlation
 ```
 fields @timestamp, @message
-| filter @message like /{tenant}/ and @message like /celery/
-| parse @message '"queue_time": *,' as queue_time
-| stats avg(queue_time) as avg_queue, max(queue_time) as max_queue by bin(15m)
+| filter @message like /{filter_pattern}/ and (@message like /error/i or @message like /exception/i)
+| stats count(*) as error_count by bin(15m)
 | sort bin asc
 ```
