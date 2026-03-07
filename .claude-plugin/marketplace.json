@@ -12,9 +12,9 @@
     {
       "name": "debug-prod",
       "source": "./plugins/debug-prod",
-      "description": "CloudWatch Log investigation skill with structured 6-phase RCA methodology",
+      "description": "Generic CloudWatch log investigation skill with adaptive debugging methodology",
       "version": "1.0.0",
-      "keywords": ["debugging", "cloudwatch", "aws", "production", "logs", "rca"],
+      "keywords": ["debugging", "cloudwatch", "aws", "production", "logs", "investigation"],
       "category": "debugging"
     }
   ]
