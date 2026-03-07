@@ -16,6 +16,14 @@
       "version": "1.0.0",
       "keywords": ["debugging", "cloudwatch", "aws", "production", "logs", "investigation"],
       "category": "debugging"
+    },
+    {
+      "name": "ui-ux-builder",
+      "source": "./plugins/ui-ux-builder",
+      "description": "Full-lifecycle UI/UX skill: requirements, design planning, implementation, and visual validation with Playwright screenshots",
+      "version": "1.0.0",
+      "keywords": ["ui", "ux", "frontend", "design", "screenshots", "playwright", "validation", "responsive"],
+      "category": "frontend"
     }
   ]
 }
